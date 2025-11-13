@@ -25,13 +25,21 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const socketInstance = new (ClientIO as any)(process.env.NEXT_PUBLIC_SITE_URL!, {
       path: "/api/socket/io",
       addTrailingSlash: false,
+      reconnectionAttempts: 3,
+      reconnectionDelay: 2000,
     });
 
     socketInstance.on("connect", () => {
       setIsConnected(true);
+      console.log("✅ Socket.io connected");
     });
 
     socketInstance.on("disconnect", () => {
+      setIsConnected(false);
+    });
+
+    socketInstance.on("connect_error", (error: any) => {
+      console.log("ℹ️ Socket.io not available - using polling fallback");
       setIsConnected(false);
     });
 
