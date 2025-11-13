@@ -4,8 +4,9 @@ import { currentProfile } from "@/lib/current-profile";
 import { db } from "@/lib/db";
 import { ServerSidebar } from "@/components/server/server-sidebar";
 
-const ServerIdLayout = async ({ children, params }: { children: React.ReactNode; params: { serverId: string } }) => {
+const ServerIdLayout = async ({ children, params }: { children: React.ReactNode; params: Promise<{ serverId: string }> }) => {
   const profile = await currentProfile();
+  const { serverId } = await params;
 
   if (!profile) {
     return redirect("/sign-in");
@@ -13,7 +14,7 @@ const ServerIdLayout = async ({ children, params }: { children: React.ReactNode;
 
   const server = await db.server.findUnique({
     where: {
-      id: params.serverId,
+      id: serverId,
       members: {
         some: {
           profileId: profile.id,
@@ -29,7 +30,7 @@ const ServerIdLayout = async ({ children, params }: { children: React.ReactNode;
   return (
     <div className="h-full">
       <div className="hidden md:flex h-full w-60 z-20 flex-col fixed inset-y-0">
-        <ServerSidebar serverId={params.serverId} />
+        <ServerSidebar serverId={serverId} />
       </div>
       <main className="h-full md:pl-60">{children}</main>
     </div>
